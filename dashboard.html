@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Dashboard - Tina Beauty Studio Patong</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .appointment-card {
+            transition: all 0.2s ease;
+        }
+        
+        .appointment-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-requested { background-color: #e879f9; }
+        .status-scheduled { background-color: #3b82f6; }
+        .status-confirmed { background-color: #10b981; }
+        .status-in_progress { background-color: #f59e0b; }
+        .status-completed { background-color: #6b7280; }
+        .status-cancelled { background-color: #ef4444; }
+        .status-no_show { background-color: #7c3aed; }
+        
+        /* Chart container optimizations */
+        .chart-container {
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .chart-container canvas {
+            max-width: 100%;
+            height: auto !important;
+        }
+        
+        /* Responsive chart adjustments */
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 200px !important;
+                max-height: 200px !important;
+            }
+        }
+        
+        /* Ensure overview layout is compact */
+        .overview-section {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-gem text-purple-600 text-2xl mr-3"></i>
+                    <div>
+                        <h1 class="font-playfair text-2xl font-bold text-gray-800">Studio Dashboard</h1>
+                        <p class="text-gray-600">Keep track of all the good vibes! 💫</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-gray-700 hover:text-purple-600 transition">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                    <a href="booking.html" class="btn-primary text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-plus mr-2"></i>New Booking
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4">
+            <nav class="flex space-x-8">
+                <button class="tab-button px-6 py-4 text-sm font-semibold rounded-t-lg active" onclick="showTab('overview')">
+                    <i class="fas fa-chart-bar mr-2"></i>Overview
+                </button>
+                <button class="tab-button px-6 py-4 text-sm font-semibold rounded-t-lg" onclick="showTab('appointments')">
+                    <i class="fas fa-calendar-alt mr-2"></i>Appointments
+                </button>
+                <button class="tab-button px-6 py-4 text-sm font-semibold rounded-t-lg" onclick="showTab('customers')">
+                    <i class="fas fa-users mr-2"></i>Customers
+                </button>
+                <button class="tab-button px-6 py-4 text-sm font-semibold rounded-t-lg" onclick="showTab('services')">
+                    <i class="fas fa-concierge-bell mr-2"></i>Services
+                </button>
+                <button class="tab-button px-6 py-4 text-sm font-semibold rounded-t-lg" onclick="showTab('staff')">
+                    <i class="fas fa-user-tie mr-2"></i>Staff
+                </button>
+                <button class="tab-button px-6 py-4 text-sm font-semibold rounded-t-lg" onclick="showTab('users')">
+                    <i class="fas fa-users-cog mr-2"></i>Customer Accounts
+                </button>
+                <button class="tab-button px-6 py-4 text-sm font-semibold rounded-t-lg" onclick="showTab('promotions')">
+                    <i class="fas fa-envelope-open-text mr-2"></i>Promotions
+                </button>
+                <button class="tab-button px-6 py-4 text-sm font-semibold rounded-t-lg" onclick="showTab('settings')">
+                    <i class="fas fa-cog mr-2"></i>Settings
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content">
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 overview-section">
+                <div class="stat-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-sm font-semibold text-gray-600">Today's Appointments</h3>
+                            <p id="today-appointments" class="text-2xl font-bold text-gray-800">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-sm font-semibold text-gray-600">Today's Revenue</h3>
+                            <p id="today-revenue" class="text-2xl font-bold text-gray-800">$0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-users text-purple-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-sm font-semibold text-gray-600">Total Customers</h3>
+                            <p id="total-customers" class="text-2xl font-bold text-gray-800">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <i class="fas fa-chart-line text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-sm font-semibold text-gray-600">This Month</h3>
+                            <p id="month-revenue" class="text-2xl font-bold text-gray-800">$0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 overview-section">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="font-semibold text-lg text-gray-800 mb-4">Weekly Appointments</h3>
+                    <div class="chart-container" style="position: relative; height: 250px; max-height: 250px;">
+                        <canvas id="appointmentsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="font-semibold text-lg text-gray-800 mb-4">Service Popularity</h3>
+                    <div class="chart-container" style="position: relative; height: 250px; max-height: 250px;">
+                        <canvas id="servicesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Today's Schedule -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="font-semibold text-lg text-gray-800 mb-4">Today's Schedule</h3>
+                <div id="today-schedule" class="space-y-3 max-h-96 overflow-y-auto">
+                    <!-- Today's appointments will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments Tab -->
+        <div id="appointments-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-semibold text-xl text-gray-800">All Appointments</h2>
+                        <div class="flex space-x-4">
+                            <select id="appointment-filter" class="border border-gray-300 rounded-lg px-4 py-2">
+                                <option value="">All Statuses</option>
+                                <option value="requested">Requested</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="no_show">No Show</option>
+                            </select>
+                            <a href="booking.html" class="btn-primary text-white px-4 py-2 rounded-lg">
+                                <i class="fas fa-plus mr-2"></i>New Appointment
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div id="appointments-list" class="space-y-4">
+                        <!-- Appointments will be loaded here -->
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div id="appointments-pagination" class="mt-6 flex justify-center">
+                        <!-- Pagination buttons will be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Tab -->
+        <div id="customers-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-semibold text-xl text-gray-800">Customer Management</h2>
+                        <div class="flex space-x-4">
+                            <input type="text" id="customer-search" placeholder="Search customers..." class="border border-gray-300 rounded-lg px-4 py-2">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div id="customers-list" class="overflow-x-auto">
+                        <!-- Customers table will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Tab -->
+        <div id="services-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-semibold text-xl text-gray-800">Service Management</h2>
+                        <button onclick="showAddServiceModal()" class="btn-primary text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-plus mr-2"></i>Add Service
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div id="services-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Services will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Tab -->
+        <div id="staff-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-semibold text-xl text-gray-800">Staff Management</h2>
+                        <button onclick="showAddStaffModal()" class="btn-primary text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-plus mr-2"></i>Add Staff Member
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div id="staff-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Staff will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Admin Tab -->
+        <div id="users-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <div>
+                        <h2 class="font-semibold text-xl text-gray-800">Customer Accounts</h2>
+                        <p class="text-gray-600 mt-1">Contact/subscriber records created during booking or signup. Dashboard admin accounts are managed separately in Supabase Auth.</p>
+                    </div>
+                    <button onclick="showAddUserModal()" class="btn-primary text-white px-4 py-2 rounded-lg font-semibold">
+                        <i class="fas fa-plus mr-2"></i>Add User
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <!-- Search and Filter -->
+                    <div class="mb-6 flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="text" id="user-search" placeholder="Search users..." 
+                                   class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <select id="role-filter" class="p-3 border border-gray-300 rounded-lg">
+                            <option value="">All Roles</option>
+                            <option value="admin">Admin</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Users List -->
+                    <div id="users-list" class="space-y-4">
+                        <!-- Users will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promotions Tab -->
+        <div id="promotions-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <div>
+                        <h2 class="font-semibold text-xl text-gray-800">Promotional Subscribers</h2>
+                        <p class="text-gray-600 mt-1">Manage customers who've consented to receive promotional offers</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="exportPromotionalEmails()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition">
+                            <i class="fas fa-download mr-2"></i>Export List
+                        </button>
+                        <button onclick="openGmailCompose()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
+                            <i class="fab fa-google mr-2"></i>Send via Gmail
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <!-- Statistics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-sm font-semibold opacity-90">Total Subscribers</h3>
+                                    <p id="total-subscribers" class="text-3xl font-bold">0</p>
+                                </div>
+                                <i class="fas fa-users text-3xl opacity-80"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-sm font-semibold opacity-90">Booking Signups</h3>
+                                    <p id="booking-subscribers" class="text-3xl font-bold">0</p>
+                                </div>
+                                <i class="fas fa-calendar-check text-3xl opacity-80"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-sm font-semibold opacity-90">Homepage Signups</h3>
+                                    <p id="homepage-subscribers" class="text-3xl font-bold">0</p>
+                                </div>
+                                <i class="fas fa-mouse-pointer text-3xl opacity-80"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Search and Filter -->
+                    <div class="mb-6 flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="text" id="promotional-search" placeholder="Search subscribers..." 
+                                   class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <select id="promotional-source-filter" class="p-3 border border-gray-300 rounded-lg">
+                            <option value="">All Sources</option>
+                            <option value="booking">Booking Signups</option>
+                            <option value="homepage">Homepage Signups</option>
+                            <option value="manual">Manual Signups</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Subscribers List -->
+                    <div id="promotional-subscribers-list" class="space-y-4">
+                        <!-- Promotional subscribers will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg">
+                <div class="p-6 border-b">
+                    <h2 class="font-semibold text-xl text-gray-800">Business Settings</h2>
+                </div>
+                
+                <div class="p-6">
+                    <form id="settings-form" class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="salon-name" class="block text-sm font-semibold text-gray-700 mb-2">Salon Name</label>
+                                <input type="text" id="salon-name" name="salon_name" class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label for="salon-phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                                <input type="tel" id="salon-phone" name="phone" class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="salon-address" class="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+                            <input type="text" id="salon-address" name="address" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        
+                        <div>
+                            <label for="salon-email" class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                            <input type="email" id="salon-email" name="email" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        
+                        <div>
+                            <label for="about-text" class="block text-sm font-semibold text-gray-700 mb-2">About Us</label>
+                            <textarea id="about-text" name="about_text" rows="4" class="w-full p-3 border border-gray-300 rounded-lg"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary text-white px-6 py-3 rounded-lg">
+                            <i class="fas fa-save mr-2"></i>Save Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Staff Edit Modal -->
+    <div id="staff-edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-90vh overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-playfair text-2xl font-bold text-gray-800">Edit Staff Member</h2>
+                <button onclick="closeStaffModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="staff-edit-form" class="space-y-6">
+                <input type="hidden" id="edit-staff-id">
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="edit-staff-name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="edit-staff-name" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="edit-staff-email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="edit-staff-email" name="email" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="edit-staff-phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                        <input type="tel" id="edit-staff-phone" name="phone" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="edit-staff-photo" class="block text-sm font-semibold text-gray-700 mb-2">Photo URL (Optional)</label>
+                        <input type="url" id="edit-staff-photo" name="photo_url" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="https://example.com/photo.jpg">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="edit-staff-specialties" class="block text-sm font-semibold text-gray-700 mb-2">Specialties</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="specialties" value="Hair" class="mr-2">
+                            <span class="text-sm">Hair Services</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="specialties" value="Nails" class="mr-2">
+                            <span class="text-sm">Nail Services</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="specialties" value="Skincare" class="mr-2">
+                            <span class="text-sm">Skincare</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="specialties" value="Makeup" class="mr-2">
+                            <span class="text-sm">Makeup</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="specialties" value="Spa" class="mr-2">
+                            <span class="text-sm">Spa Treatments</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="specialties" value="Other" class="mr-2">
+                            <span class="text-sm">Other</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="edit-staff-bio" class="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
+                    <textarea id="edit-staff-bio" name="bio" rows="3" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Tell us about this awesome team member!"></textarea>
+                </div>
+                
+                <div>
+                    <label for="edit-staff-working-hours" class="block text-sm font-semibold text-gray-700 mb-2">Working Hours (JSON Format)</label>
+                    <textarea id="edit-staff-working-hours" name="working_hours" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder='{"monday": "10:00-18:00", "tuesday": "10:00-18:00", "friday": "10:00-19:00"}'></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Format: {"day": "start-end"} - Use 24-hour format</p>
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" id="edit-staff-active" name="active" class="mr-3 w-4 h-4 text-purple-600">
+                    <label for="edit-staff-active" class="text-sm font-semibold text-gray-700">Staff member is active (visible to customers)</label>
+                </div>
+                
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeStaffModal()" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary text-white px-6 py-3 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Service Edit Modal -->
+    <div id="service-edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-90vh overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-playfair text-2xl font-bold text-gray-800">Edit Service</h2>
+                <button onclick="closeServiceModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="service-edit-form" class="space-y-6">
+                <input type="hidden" id="edit-service-id">
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="edit-service-name" class="block text-sm font-semibold text-gray-700 mb-2">Service Name</label>
+                        <input type="text" id="edit-service-name" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="edit-service-category" class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                        <select id="edit-service-category" name="category" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                            <option value="">Select Category</option>
+                            <option value="Hair">Hair</option>
+                            <option value="Nails">Nails</option>
+                            <option value="Skincare">Skincare</option>
+                            <option value="Makeup">Makeup</option>
+                            <option value="Spa">Spa</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="edit-service-duration" class="block text-sm font-semibold text-gray-700 mb-2">Duration (minutes)</label>
+                        <input type="number" id="edit-service-duration" name="duration" required min="15" max="300" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="edit-service-price" class="block text-sm font-semibold text-gray-700 mb-2">Price ($)</label>
+                        <input type="number" id="edit-service-price" name="price" required min="0" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="edit-service-image" class="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
+                    <input type="url" id="edit-service-image" name="image_url" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="https://example.com/image.jpg">
+                </div>
+                
+                <div>
+                    <label for="edit-service-description" class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                    <textarea id="edit-service-description" name="description" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Tell us what makes this service awesome!"></textarea>
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" id="edit-service-active" name="active" class="mr-3 w-4 h-4 text-purple-600">
+                    <label for="edit-service-active" class="text-sm font-semibold text-gray-700">Service is active (visible to customers)</label>
+                </div>
+                
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeServiceModal()" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary text-white px-6 py-3 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="user-add-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-playfair text-2xl font-bold text-gray-800">Add New User</h2>
+                <button onclick="closeUserModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="user-add-form" class="space-y-6">
+                <div>
+                    <label for="add-user-name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                    <input type="text" id="add-user-name" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div>
+                    <label for="add-user-email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                    <input type="email" id="add-user-email" name="email" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <p class="text-xs text-gray-500 -mt-2">
+                    This adds a contact/subscriber record only. Dashboard admin accounts are
+                    created separately in the Supabase dashboard (Authentication &rarr; Users).
+                </p>
+
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeUserModal()" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary text-white px-6 py-3 rounded-lg">
+                        <i class="fas fa-plus mr-2"></i>Add User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Appointment Edit Modal -->
+    <div id="appointment-edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-90vh overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-playfair text-2xl font-bold text-gray-800">Edit Appointment</h2>
+                <button onclick="closeAppointmentModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="appointment-edit-form" class="space-y-6">
+                <input type="hidden" id="edit-appointment-id">
+                
+                <!-- Customer and Service Info (Read-only display) -->
+                <div class="bg-gray-50 rounded-lg p-4 border">
+                    <h3 class="font-semibold text-gray-800 mb-3">Appointment Details</h3>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="font-medium text-gray-600">Customer:</span>
+                            <div id="edit-customer-name" class="text-gray-800 font-semibold"></div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Service:</span>
+                            <div id="edit-service-name" class="text-gray-800 font-semibold"></div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Duration:</span>
+                            <div id="edit-service-duration" class="text-gray-800"></div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Price:</span>
+                            <div id="edit-service-price" class="text-gray-800 font-semibold"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Editable Fields -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="edit-appointment-date" class="block text-sm font-semibold text-gray-700 mb-2">Appointment Date</label>
+                        <input type="date" id="edit-appointment-date" name="date" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                    </div>
+                    
+                    <div>
+                        <label for="edit-appointment-time" class="block text-sm font-semibold text-gray-700 mb-2">Appointment Time</label>
+                        <select id="edit-appointment-time" name="time" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                            <option value="">Select Time</option>
+                            <option value="09:00">09:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="13:00">01:00 PM</option>
+                            <option value="14:00">02:00 PM</option>
+                            <option value="15:00">03:00 PM</option>
+                            <option value="16:00">04:00 PM</option>
+                            <option value="17:00">05:00 PM</option>
+                            <option value="18:00">06:00 PM</option>
+                            <option value="19:00">07:00 PM</option>
+                            <option value="20:00">08:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="edit-appointment-staff" class="block text-sm font-semibold text-gray-700 mb-2">Assigned Staff Member</label>
+                        <select id="edit-appointment-staff" name="staff_id" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                            <option value="unassigned">No Staff Assigned</option>
+                            <!-- Staff options will be populated dynamically -->
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="edit-appointment-status" class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                        <select id="edit-appointment-status" name="status" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                            <option value="requested">🟡 Requested</option>
+                            <option value="scheduled">🔵 Scheduled</option>
+                            <option value="confirmed">🟢 Confirmed</option>
+                            <option value="in_progress">🟠 In Progress</option>
+                            <option value="completed">⚫ Completed</option>
+                            <option value="cancelled">🔴 Cancelled</option>
+                            <option value="no_show">⚪ No Show</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="edit-appointment-notes" class="block text-sm font-semibold text-gray-700 mb-2">Notes</label>
+                    <textarea id="edit-appointment-notes" name="notes" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Add any notes about this appointment..."></textarea>
+                </div>
+                
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeAppointmentModal()" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary text-white px-6 py-3 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 text-center">
+            <i class="fas fa-spinner fa-spin text-purple-600 text-3xl mb-4"></i>
+            <p class="text-gray-700">Loading...</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
